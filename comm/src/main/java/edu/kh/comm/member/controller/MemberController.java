@@ -11,14 +11,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.google.gson.Gson;
 
 import edu.kh.comm.member.model.service.MemberService;
 import edu.kh.comm.member.model.service.MemberServiceImpl;
@@ -238,6 +242,120 @@ public class MemberController {
 		
 		return "member/signUp";
 	}
+	
+	
+	
+	// 이메일 중복 검사 
+	/** memberEmail
+	 * @param memberEmail
+	 * @return
+	 */
+	@ResponseBody // ajax 응답시 사용
+	@GetMapping("/emailDupCheck")
+	//public int emailDupCheck( @RequestParam("memberEmail") String memberEmail) { // 파라미터 키값과 저장 변수명이 같으명 생략 가능
+	  public int emailDupCheck(String memberEmail) {			
+		// 컨트롤러에서 반환되는 값은 forward 또는 redirect를 위한 경로인 경우가 일반적
+		// 그래서 반환되는 값은 경로로 인식됨 
+		
+		// 이를 해결하기 위해 @ResponseBody 어노테이션 사용
+		
+		// @ResponseBody : 반환되는 값을 응답의 몸통에 추가하여 이전 요청 주소로 돌아감
+		// -> 컨트롤러에서 반환되는 값이 경로가 아닌 값 자체로 인식
+		
+		
+		return service.emailDupCheck(memberEmail);
+	}
+	
+	// 닉네임 유효성 검사
+	@ResponseBody
+	@GetMapping("/nicknameDupCheck")
+	public int nicknameDupCheck(String memberNickname) {
+		
+		return service.nicknameDupCheck(memberNickname);
+	}
+	
+	// 회원가입 
+	@PostMapping("/signUp")
+	public String singUp(Member signUpMember,
+						Model model,
+						RedirectAttributes ra,
+						HttpServletResponse resp,
+						HttpServletRequest req ) {
+		
+		logger.info("회원가입 수행됨");
+		 int result = service.signUp(signUpMember);
+		
+		if(result >0) { //회원가입 성공시
+			
+			model.addAttribute("signUpMember", result);
+			
+		} else {
+			
+			ra.addFlashAttribute("message", "회원가입 실패");
+			
+		}
+		return "redirect:/";
+		
+	}
+	
+	// 회원 한명 조회
+	
+	Gson gson = new Gson();
+	
+	
+	
+	@PostMapping("/selectOne")
+	public String selectOne(String memberEmail, Model model,
+							RedirectAttributes ra,
+							HttpServletResponse resp,
+							HttpServletRequest req) {
+		
+		logger.info("회원한명 찾기");
+		
+		int member = service.selectOne(memberEmail);
+		
+		if(member >0) {
+			
+			model.addAttribute("member", member );
+			logger.info("찾기 성공");
+			
+		} else {
+			ra.addFlashAttribute("message", "조회 정보 오류");
+		}
+		return "redirect:/";
+		
+	}
+	
+	/* 스프링 예외 처리 방법(3가지, 중복 사용 가능)
+	 * 
+	 * 1순위 : 메소드 별로 예외처리(try-catch / throws)
+	 * 
+	 * 2순위 : 하나의 컨트롤러에서 발생하는 예외를 모아서 처리 -> @ExcepotionHandeler(메서드에 작성)
+	 * 
+	 * 3순의 : 전역(웹 어플리케이션)에서 발생 하는 예외를 모아서 처리 -> @ControllerAdvice(클래스에 작성)
+	 * 
+	 * 
+	 * */
+	
+	// 회원 컨트롤러에서 발생 하는 모든 예외를 처리
+	//@ExceptionHandler(Exception.class)
+	//public String exceptionHandler(Exception e, Model model) {
+		//e.printStackTrace();
+		
+		//model.addAttribute("errorMessage", "서비스 오류");
+		//model.addAttribute("e", e);
+		
+		//return "common/error";
+	//}
+	
+	//@PostMapping("selectAll")
+	//public String selectAll(Model model) {
+		
+		
+		
+	//}
+	
+	
 	
 	
 }

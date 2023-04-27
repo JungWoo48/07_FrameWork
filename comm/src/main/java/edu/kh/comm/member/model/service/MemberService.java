@@ -14,6 +14,10 @@ import edu.kh.comm.member.model.vo.Member;
  *  3. 클래스간의 결합도를 약화 시키기 위하여 -> 유지보수성 향상
  * 
  * */
+/**
+ * 
+ *
+ */
 public interface MemberService {
 	
 	// 모든 메서드가 추상 메서드이다.( 묵시적으로 public abstract)
@@ -24,6 +28,44 @@ public interface MemberService {
 	 * @return loginMember
 	 */
 	public abstract Member login(Member inputMember);
+
+	
+	
+	
+	/** 이메일 중복 검사
+	 * @param memberEmail
+	 * @return
+	 */
+	public abstract int emailDupCheck(String memberEmail);
+
+
+
+
+	/** 닉네임 중복 검사
+	 * @param memberNickname
+	 * @return
+	 */
+	public abstract int nicknameDupCheck(String memberNickname);
+
+
+
+
+	/** 회원가입 service
+	 * @param signUpMember
+	 * @return
+	 */
+	public abstract int signUp(Member signUpMember);
+
+
+
+
+	/** 회원 한명 조회 service
+	 * @param memberEmail
+	 * @return
+	 */
+	public abstract int selectOne(String memberEmail);
+
+
 
 }
 

@@ -44,4 +44,49 @@ public class MemberDAO {
 		return loginMember;
 	}
 
+	
+	
+	/** 이메일 중복 검사 DAO
+	 * @param memberEmail
+	 * @return result
+	 */
+	public int emailDupCheck(String memberEmail) {
+		
+		return sqlSession.selectOne("memberMapper.emailDupCheck", memberEmail);
+	}
+
+
+
+	/** 닉네임 중복 검사
+	 * @param memberNickname
+	 * @return
+	 */
+	public int nicknameDupCheck(String memberNickname) {
+		
+		return sqlSession.selectOne("memberMapper.nicknameDupCheck", memberNickname);
+	}
+	
+	
+	/** 회원가입 DAO
+	 * @param signUpMember
+	 * @return
+	 */
+	public int singUp(Member signUpMember) {
+		
+		int result = sqlSession.insert("memberMapper.signUp", signUpMember);
+		
+		
+		return result;
+		
+		
+	}
+
+
+
+	public int selectOne(String memberEmail) {
+	
+		return sqlSession.selectOne("memberMapper.selectOne", memberEmail);
+	}
+	
+
 }
