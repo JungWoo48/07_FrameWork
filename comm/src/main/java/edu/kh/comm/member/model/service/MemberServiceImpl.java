@@ -1,6 +1,9 @@
 package edu.kh.comm.member.model.service;
 
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -90,17 +93,37 @@ public class MemberServiceImpl implements MemberService{
 		return dao.nicknameDupCheck(memberNickname);
 	}
 
+	/**
+	 *회원가입 서비스 구현
+	 */
 	@Override
 	public int signUp(Member signUpMember) {
 		
-		return dao.singUp(signUpMember);
+		// 비밀번호 암호화
+		String encPw = bcrypt.encode( signUpMember.getMemberPw());
+		
+		// 암호화된 비밀번호로 다시 세팅
+		signUpMember.setMemberPw(encPw);
+		
+		int result  = dao.singUp(signUpMember);
+		
+		return result;
+		
 	}
 	
-	@Override
-	public int selectOne(String memberEmail) {
+	// 회원 1명 정보 조회 서비스 구현
+		@Override
+		public Member selectOne(String memberEmail) {
+			return dao.selectOne(memberEmail);
+		}
+
+
+		// 회원 목록 조회 서비스 구현
+		@Override
+		public List<Member> selectAll() {
+			return dao.selectAll();
+		}
 		
-		return dao.selectOne(memberEmail);
-	}
 	
 	
 	

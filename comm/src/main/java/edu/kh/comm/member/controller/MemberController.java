@@ -1,5 +1,7 @@
 package edu.kh.comm.member.controller;
 
+import java.util.List;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -280,51 +282,81 @@ public class MemberController {
 						Model model,
 						RedirectAttributes ra,
 						HttpServletResponse resp,
-						HttpServletRequest req ) {
+						HttpServletRequest req,
+						String[] memberAddress
+						) {
+		
+		// 커맨드 객체를 이용해서 입력된 회원 정보를 잘 받아옴
+		// 단 같은 name을 가진 주소가 하나의 문자열로 합쳐서 세팅되어 들어옴
+		// -> 도로명 주소에 ","기호가 포함되는 경우가 있어 이를 구분자로 사용할 수 없다.
+		
+		signUpMember.setMemberAddress(String.join(",,", memberAddress));
+		String.join(",,", memberAddress);
+		// String.join("구분자", 배열)
+		// 배열을 하나의 문자열로 합치는 메서드
+		// 값 중간 중간에 구분자가 들어가서 하나의 문자열로 합쳐줌
+		// [a,b,c] -> join 진행 -> "a,,b,,c"
+		
+		if(signUpMember.getMemberAddress().equals(",,,,")) { //주소가 입력되지 않은 경우
+			signUpMember.setMemberAddress(null);
+		}
+		
 		
 		logger.info("회원가입 수행됨");
 		 int result = service.signUp(signUpMember);
+		 
+		 String message = null;
+		 String path = null;
 		
 		if(result >0) { //회원가입 성공시
+			message = "회원가입 성공";
+			path = "redirect:/";// 메인페이지로 이동
+				
+		} else { // 회원가입 실패
+			message = "회원가입 실패";
+			path = "redirect:/member?signUp";
 			
-			model.addAttribute("signUpMember", result);
-			
-		} else {
-			
-			ra.addFlashAttribute("message", "회원가입 실패");
 			
 		}
-		return "redirect:/";
+		
+		ra.addFlashAttribute("message", message);
+		return path;
 		
 	}
 	
 	// 회원 한명 조회
 	
-	Gson gson = new Gson();
-	
-	
-	
-	@PostMapping("/selectOne")
-	public String selectOne(String memberEmail, Model model,
-							RedirectAttributes ra,
-							HttpServletResponse resp,
-							HttpServletRequest req) {
-		
-		logger.info("회원한명 찾기");
-		
-		int member = service.selectOne(memberEmail);
-		
-		if(member >0) {
+	// 회원 1명 정보 조회(ajax)
+		@ResponseBody // 반환되는 값이 forward/redirect 경로가 아닌 값 자체임을 인식(ajax시 사용)
+		@PostMapping("/selectOne")
+		public String selectOne(@RequestParam("memberEmail") String memberEmail) {
 			
-			model.addAttribute("member", member );
-			logger.info("찾기 성공");
+			Member mem = service.selectOne(memberEmail);
 			
-		} else {
-			ra.addFlashAttribute("message", "조회 정보 오류");
+			// JSON : 자바스크립트 객체 표기법으로 작성된 문자열(String)
+			
+			// GSON 라이브러리 : JSON을 쉽게 다루기 위한 Google에서 제공하는 라이브러리
+			
+			// Gson().toJson(object) : 객체를 JSON 형태로 변환
+			return new Gson().toJson(mem); 
+			// "{'memberEmail':'test01@naver.com', 'memberNickname' : '테스트1', ....}"
+			
 		}
-		return "redirect:/";
 		
-	}
+		// 회원 목록 조회(ajax)
+		@ResponseBody
+		@GetMapping("/selectAll")
+		public String selectAll() {
+			
+			List<Member> list = service.selectAll();
+			
+			return new Gson().toJson(list);
+		}
+		
+		
+		
+		
+		
 	
 	/* 스프링 예외 처리 방법(3가지, 중복 사용 가능)
 	 * 

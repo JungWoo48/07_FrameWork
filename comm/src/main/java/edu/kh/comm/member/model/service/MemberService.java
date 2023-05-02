@@ -1,5 +1,7 @@
 package edu.kh.comm.member.model.service;
 
+import java.util.List;
+
 import edu.kh.comm.member.model.vo.Member;
 
 /* Service interface를 사용하는 이유
@@ -58,19 +60,22 @@ public interface MemberService {
 
 
 
-
-	/** 회원 한명 조회 service
+	/** 회원 1명 정보 조회 서비스
 	 * @param memberEmail
-	 * @return
+	 * @return 
 	 */
-	public abstract int selectOne(String memberEmail);
+	public abstract Member selectOne(String memberEmail);
+	
+	
+	/** 회원 목록 조회 서비스
+	 * @return list
+	 */
+	public abstract List<Member> selectAll();
+
 
 
 
 }
-
-
-
 
 
 

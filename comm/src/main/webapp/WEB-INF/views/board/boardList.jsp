@@ -2,7 +2,15 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"  %>
 
 <!-- map에 저장된 값을 각각 변수에 저장 -->
-<c:set var="boardName" value="${map.boardName}" />
+<c:forEach vat="boardType" items="${boardTypeList}">
+	<c:if test="${boardCode == boardtype.boardCode}">
+		<c:set var="boardname" value="${boardType.boardName}"/>
+	</c:if>
+</c:forEach>
+
+
+
+<%-- <c:set var="boardName" value="${map.boardName}" />--%>
 <c:set var="pagination" value="${map.pagination}" />
 <c:set var="boardList" value="${map.boardList}" />
 

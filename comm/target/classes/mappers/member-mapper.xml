@@ -151,7 +151,8 @@
 		#{memberPw},
 		#{memberNickname},
 		#{memberTel},
-		DEFAULT,DEFAULT,DEFAULT,DEFAULT)
+		#{memberAddress},
+		DEFAULT,DEFAULT,DEFAULT)
 	</insert>
 	
 	<select id="selectOne" parameterType="string" resultType="_int">
@@ -161,6 +162,13 @@
 		FROM MEMBER_S
 		WHERE MEMBER_EMAIL = #{memberEmail}
 		AND SECESSION_FL = 'N' 
+	</select>
+	
+	<select id="selectAll" resultMap="member_rm">	
+	SELECT MEMBER_NO, MEMBER_EMAIL, MEMBER_NICK
+	FROM MEMBER_S
+	WHERE SECESSION_FL = 'N'
+	ORDER BY MEMBER_NO 
 	</select>
 	
 </mapper>

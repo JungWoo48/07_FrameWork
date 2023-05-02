@@ -2,25 +2,59 @@ package edu.kh.comm.member.controller;
 
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import edu.kh.comm.member.model.service.MyPageService;
 import edu.kh.comm.member.model.vo.Member;
 
+
 @Controller
 @RequestMapping("/member/myPage")
-public class MypageController {
+@SessionAttributes({"loginMember"}) // session scope에서 loginMember를 얻어옴
+public class MyPageController {
+	private Logger logger = LoggerFactory.getLogger(MyPageController.class);
 	
-	private Logger logger = LoggerFactory.getLogger(MypageController.class);
-	
+	@Autowired
 	private MyPageService service;
+	
+	// 회원 정보 조회
+	@GetMapping("/info")
+	public String info() {
+		return "member/myPage-info";
+	}
+	
+	// 비밀번호 변경
+	@GetMapping("/changePw")
+	public String changePw() {
+		return "member/myPage-changePw";
+	}
+	
+	// 회원 탈퇴
+	@GetMapping("/secession")
+	public String secession() {
+		return "member/myPage-secession";
+	}
+	
+	// 프로필 변경
+	@GetMapping("/profile")
+	public String profile() {
+		return "member/myPage-profile";
+	}
 	
 	//@PostMapping("/changePw")
 	//public int changPw(String memberPw) {
@@ -37,9 +71,6 @@ public class MypageController {
 		
 		logger.info("회원정보 수정 수행");
 		
-		
-		
-		Map<String, Object> parammap = service.updateinfo(paramMap, loginMember);
 		
 		//필요한 값 - 닉네임, 주소, 전화번호
 		// 주소는 (String[]로 얻어와서 String.join()을 이영해서 문자열로 변경
@@ -66,7 +97,109 @@ public class MypageController {
 		
 		// 해결법 : 파라미터의 name속성을 변경해서 얻어온다(필드명을 다르게)
 		
-		return "/redirect";
+		// 파라미터를 저장한 paramMap에 회원번호, 주소를 추가
+		String memberAddress = String.join(",,", updateAdress); // 주소 배열 -> 문자열 변환
+		
+		// 주소 미입력시 
+		if(memberAddress.equals(",,,,")) memberAddress = null;
+		
+		paramMap.put("memberNO", loginMember.getMemberNo());
+		paramMap.put("memberAdress", memberAddress);
+		
+		// 회원 정보 수정 서비스 호출
+		int result = service.updateInfo(paramMap);
+		
+		String message = null;
+		
+		if(result > 0) {
+			message = "회원정보 수정됨";
+			
+			// 바뀐 로그인 정보 동기화
+			loginMember.setMemberNickname( (String) paramMap.get("updateNickname"));
+			loginMember.setMemberTel((String) paramMap.get("updateTel"));
+			loginMember.setMemberAddress((String) paramMap.get("updateAddress"));
+			
+		} else {
+			message = "회원정보 수정실패";
+		}
+		ra.addFlashAttribute("message", message);
+		
+		return "/redirect:info";
 	}
+
+	// 비밀번호 변경
+	
+	@PostMapping("/chagePw")
+	public String chagePw( @RequestParam Map<String,Object> paramMap,
+							@ModelAttribute("loginMember") Member loginMember,
+							RedirectAttributes ra 
+			) {
+		
+		// 로그인 된 회원의 번호를 paramMap에 추가
+		paramMap.put("memberNO", loginMember.getMemberNo());
+		
+		// 비밀번호 변경 서비스 호출
+		int result = service.changePw(paramMap);
+		
+		String message = null;
+		String path = null;
+		
+		if(result >0) {
+			message = "비밀번호 변경";
+			path = "info";
+		} else {
+			message = "비밀번호 일치하지 않음";
+			path = "changePw";
+		}
+		ra.addFlashAttribute("message", message);
+		
+		return "redirect:" + path;
+		
+	}
+	
+	// 회원 탈퇴 
+	@PostMapping("/secession")
+	public String secession( @ModelAttribute("loginMember") Member loginMember, 
+							SessionStatus status,
+							RedirectAttributes ra,
+							HttpServletResponse resp,
+							HttpServletRequest req ) {
+		
+		// 탈퇴 서비스 호출
+		int result = service.secession(loginMember);
+		
+		// 탈퇴 성공시 메인 페이지
+		// 세션 없에기
+		// 쿠키 비우기
+		String message = null;
+		String path = null;
+		
+		if(result >0) {
+			message = "탈퇴됨";
+			path = "/";
+			
+			// 세션 없에기
+			status.setComplete();		
+			
+			// 쿠키 비우기
+			Cookie cookie = new Cookie("saveid", "");
+			cookie.setMaxAge(0);
+			cookie.setPath(req.getContextPath());
+			resp.addCookie(cookie);
+			
+			
+		} else {
+			message = "비밀번호 일치하지 않음";
+			path = "secession";
+		}
+		ra.addFlashAttribute("message", message);
+		
+		return "redirect:" + path;
+		
+	}
+		
+	
+	
+	
 
 }

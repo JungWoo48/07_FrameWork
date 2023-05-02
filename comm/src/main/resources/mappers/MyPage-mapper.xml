@@ -1,4 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="myPageMapper">
+
+	<update id="updateinfo">
+		UPDATE MWMBER_S SET
+		MEMBER_EMAIL = ${updateEmail}
+		MEMBER_NICK = ${updateNickname}
+		MEMBER_TEL = ${updateTel}
+		MEMBER_ADDR = ${updateAddress}
+		WHERE MEMBER_NO = ${memberNo}
+	</update>
+
+
+	<!-- 현재 로그인한 회원의 암호화된 비밀번호 조회 -->
+	<select id="selectEncPw" resultType="string">
+		SELECT MEMBER_PW 
+		FROM MEMBER_S
+		WHERE MEMBER_NO = ${memberNo}
+	</select>
+	
+	<update id="changePw">
+		UPDATE MEMEBR_S SET
+		MEMBER_PW = #{newPw}
+		WHERE MEMBER_NO = ${memberNo}
+	</update>
+	
+	<!-- 회원 탈퇴 -->
+	<update id="secession">
+		UPDATE MEMEBR_S SET
+		SECESSION_FL = 'Y'
+		WHERE MEMBER_NO = ${memberNo}
+	</update>
+	
+	<update id="updateProfile">
+	UPDATE MEMBER_S SETPROFILE_IMG = #{profileImage}
+	WHERE MEMBER_NO = ${memberNo} 
+	</update>
 </mapper>
+
+
+
+
+
+
+
+

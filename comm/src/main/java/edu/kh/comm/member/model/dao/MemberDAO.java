@@ -1,5 +1,7 @@
 package edu.kh.comm.member.model.dao;
 
+import java.util.List;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +75,11 @@ public class MemberDAO {
 	 */
 	public int singUp(Member signUpMember) {
 		
+		// insert, update, delete 를 수행하기 위한 메서드가 존재
+		// 반환값은 int로 고정
+		// mapper에서도 resultType이 _int로 고정
+		// 고로 생략 가능
+		
 		int result = sqlSession.insert("memberMapper.signUp", signUpMember);
 		
 		
@@ -81,12 +88,23 @@ public class MemberDAO {
 		
 	}
 
-
-
-	public int selectOne(String memberEmail) {
-	
+	/** 회원 1명 정보 조회 DAO
+	 * @param memberEmail
+	 * @return mem
+	 */
+	public Member selectOne(String memberEmail) {
 		return sqlSession.selectOne("memberMapper.selectOne", memberEmail);
 	}
-	
+
+
+	/** 회원 목록 조회 DAO
+	 * @return list
+	 */
+	public List<Member> selectAll() {
+		// selectList() : 여러 행을 조회 -> 리턴 타입이 List
+		//	* 조회되는 모든 행을 순차적으로 접근해서 VO에 필드 값을 담은 후 List에 자동 추가			
+		return sqlSession.selectList("memberMapper.selectAll");
+	}
+
 
 }
