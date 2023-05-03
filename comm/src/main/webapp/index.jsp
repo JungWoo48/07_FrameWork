@@ -2,9 +2,10 @@
 
 <!-- 
 	
-	* http://localhost:8080/comm
-	* http://localhost8080/comm/main 주소로 요청 위임
-	-> forward이기 떄문에 출력되는 주소는 http://localhost:8080/comm 유지
+	*  http://localhost:8080/comm	
+	*  http://localhost:8080/comm/main 주소로 요청 위임
+	-> forward 이기 때문에 출력되는 주소는 http://localhost:8080/comm 유지
+
  -->
  
- <jsp:forward page="main"/>
+ <jsp:forward page="main" />

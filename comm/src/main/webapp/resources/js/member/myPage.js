@@ -233,8 +233,11 @@ document.getElementById("delete-image").addEventListener("click", function(){
 
         del.value = 1; // 눌러진걸로 인식
     }
-    
- // 다음 주소 API
+
+});
+
+
+// 다음 주소 API
 
 // 우편번호 찾기 화면을 넣을 element
 var element_layer = document.getElementById('layer');
@@ -298,7 +301,7 @@ function initLayerPosition(){
     // 실행되는 순간의 화면 너비와 높이 값을 가져와서 중앙에 뜰 수 있도록 위치를 계산한다.
     element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
     element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
-}   
+}
 
-});
+
 

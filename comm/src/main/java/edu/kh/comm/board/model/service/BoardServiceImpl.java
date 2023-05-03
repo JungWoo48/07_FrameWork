@@ -17,32 +17,47 @@ public class BoardServiceImpl implements BoardService{
 	
 	@Autowired
 	private BoardDAO dao;
-	
+
+	// 게시판 코드, 이름 조회
+	@Override
 	public List<BoardType> selectBoardType() {
 		
-		 return dao.selectBoardType();
+		return dao.selectBoardType();
 	}
-	
-	// 게시글 조회 서비스 구현
+
+	// 게시글 목록 조회 서비스 구현
 	@Override
 	public Map<String, Object> selectBoardList(int cp, int boardCode) {
+		// 1) 게시판 이름 조회 -> 인터셉터로 application에 올려둔 boardTypeList 쓸 수 있을듯?
 		
-		// 1) 게시판 이름 조회 -> 인터셉터로 applicaton에 올려둔 boardTypeList를 사용
-		
-		// 2) 페이지 네이션 객체 생성(listCount)
+		// 2) 페이지네이션 객체 생성(listCount)
 		int listCount = dao.getListCount(boardCode);
 		Pagination pagination = new Pagination(cp, listCount);
+		
 		
 		// 3) 게시글 목록 조회
 		List<Board> boardList = dao.selectBoardList(pagination, boardCode);
 		
-		// Map만들어서 담기
+		// map 만들어 담기
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("pagination", pagination);
 		map.put("boardList", boardList);
 		
 		
-		return null;
+		return map;
 	}
-
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

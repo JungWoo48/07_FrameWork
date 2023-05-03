@@ -34,11 +34,9 @@
                 <h3>회원 정보 조회(AJAX)</h3>
 
                 <p>이메일을 입력 받아 일치하는 회원 정보를 출력</p>
-                
 
                 이메일 : <input type="text" id="in1">
                 <button id="select1">조회</button>
-                
                 <div id="result1" style="height:150px"></div>
 
                 <hr>

@@ -67,6 +67,7 @@
 		<level value="info" />
 	</logger>
 	
+	
 	<!-- SQL 로그 출력 -->
 	<logger name="java.sql.Connection">
 		<level value="debug" />

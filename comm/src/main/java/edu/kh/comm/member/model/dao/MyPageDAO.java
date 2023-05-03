@@ -6,15 +6,13 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import edu.kh.comm.member.model.vo.Member;
-
 @Repository
 public class MyPageDAO {
-
+	
 	@Autowired
 	private SqlSessionTemplate sqlSession;
 	
-		
+
 	/** 회원 정보 수정 DAO
 	 * @param paramMap
 	 * @return result
@@ -63,5 +61,20 @@ public class MyPageDAO {
 		
 		return sqlSession.update("myPageMapper.updateProfile", map);
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }

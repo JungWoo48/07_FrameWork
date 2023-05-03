@@ -13,24 +13,23 @@ import edu.kh.comm.board.model.vo.Pagination;
 
 @Repository
 public class BoardDAO {
-
+	
 	@Autowired
 	private SqlSessionTemplate sqlSession;
-	
-	/** 게시판 코드 이름 조회
-	 * @return
+
+	/** 게시판 코드, 이름 조회 DAO
+	 * @return boardTypeList
 	 */
 	public List<BoardType> selectBoardType() {
 		
 		return sqlSession.selectList("boardMapper.selectBoardType");
 	}
 
-	/** 특정 게시판의 전체 게시글 조회 DAO
+	/** 특정 게시판의 전체 게시글 수 조회 DAO
 	 * @param boardCode
 	 * @return listCount
 	 */
 	public int getListCount(int boardCode) {
-		
 		return sqlSession.selectOne("boardMapper.getListCount", boardCode);
 	}
 
@@ -42,11 +41,11 @@ public class BoardDAO {
 	public List<Board> selectBoardList(Pagination pagination, int boardCode) {
 		
 		// RowBounds 객체 (마이바티스)
-		// - 전체 조회 결과에서 
-		// 몇개의 행을 건너뛰고 (offset)
-		// 그 다음 몇개의 행만 (limit)조회할것인지 지정
+		// - 전체 조회 결과에서
+		//	 몇 개의 행을 건너 뛰고 (offset)
+		//	 그 다음 몇개의 행만(limit) 조회할 것인지 지정
 		
-		int offset = ( pagination.getCurrentPage() -1) * pagination.getLimit();
+		int offset = ( pagination.getCurrentPage() - 1 ) * pagination.getLimit();
 		
 		RowBounds rowBounds = new RowBounds(offset, pagination.getLimit());
 		

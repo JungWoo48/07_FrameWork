@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class MainController {
-	
+
 	@RequestMapping("/main")
 	public String mainForward() {
 		
-		return "common/main"; //dispatcherServlet 으로 전달
+		return "common/main";
 	}
-
+	
 }

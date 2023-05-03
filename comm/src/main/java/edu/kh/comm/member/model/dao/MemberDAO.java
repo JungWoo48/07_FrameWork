@@ -10,84 +10,81 @@ import org.springframework.stereotype.Repository;
 
 import edu.kh.comm.member.model.vo.Member;
 
-@Repository // 영혹성을 가지는 DB/파일과 연결되는 클래스임을 명시 + bean 등록
+@Repository // 영속성을 가지는 DB/파일과 연결되는 클래스임을 명시 + bean 등록
 public class MemberDAO {
-	
-	// DAO는 DB랑 연결하기 위한 Connection이 공통적으로 필요하다
+
+	// DAO는 DB랑 연결하기 위한 Connection이 공통적으로 필요하다!
 	// -> 필드에 선언
-	// + Mybatis 영속성 프레임워크를 이영하려면 Connection을 이용해 만들어진 객체
-	// SqlSessionTemplate을 사용
+	// + Mybatis 영속성 프레임워크를 이용하려면 Connection을 이용해 만들어진 객체
+	//   SqlSessionTemplate을 사용
 	
-	@Autowired // root-contenxt.xml 에서 생성된 sqlSessionTemplate bean을 의존성 주입(DI)한것
+	@Autowired   // root-context.xml 에서 생성된 SqlSessionTemplate bean을 의존성 주입(DI)
 	private SqlSessionTemplate sqlSession;
 	
 	private Logger logger = LoggerFactory.getLogger(MemberDAO.class);
 	
 	public Member login(Member inputMember) {
 		
-		// 1행 조회(파라미터x) 방법.
+		// 1행 조회(파라미터 X) 방법
 		//int count = sqlSession.selectOne("namespace값.id값");
 		
 		//int count = sqlSession.selectOne("memberMapper.test1");
 		//logger.debug(count + "");
 		
-		// 1행 조회(파라미터O) 방법
-		//String memberNickname = sqlSession.selectOne("memberMapper.test2", inputMember.getMemberEmail());
+		
+		// 1행 조회(파라미터 O) 방법
+		//String memberNickname = sqlSession.selectOne("memberMapper.test2",  inputMember.getMemberEmail() );
 		//logger.debug(memberNickname);
 		
-		// 1행 조회(파리미터가 VO인 경우)
-		//String memberTel = sqlSession.selectOne("memberMapper.test3", inputMember);//inputmember = email, pw
+		
+		// 1행 조회(파라미터가 VO인 경우)
+		//String memberTel = sqlSession.selectOne("memberMapper.test3", inputMember);
+																// memberEmail, memberPw
 		//logger.debug(memberTel);
 		
-		// 1행 조회(파라미터와 반환값이 모두 Vo인 경우
-		Member loginMember = sqlSession.selectOne("memberMapper.login", inputMember);
 		
+		// 1행 조회(파라미터가 VO, 반환되는 결과도 VO)
+		Member loginMember = sqlSession.selectOne("memberMapper.login", inputMember ); 
 		
 		return loginMember;
 	}
 
-	
 	
 	/** 이메일 중복 검사 DAO
 	 * @param memberEmail
 	 * @return result
 	 */
 	public int emailDupCheck(String memberEmail) {
-		
 		return sqlSession.selectOne("memberMapper.emailDupCheck", memberEmail);
 	}
 
 
-
-	/** 닉네임 중복 검사
+	/** 닉네임 중복 검사 DAO
 	 * @param memberNickname
-	 * @return
+	 * @return result
 	 */
 	public int nicknameDupCheck(String memberNickname) {
-		
 		return sqlSession.selectOne("memberMapper.nicknameDupCheck", memberNickname);
 	}
-	
-	
-	/** 회원가입 DAO
-	 * @param signUpMember
-	 * @return
+
+
+	/** 회원 가입 DAO
+	 * @param inputMember
+	 * @return result
 	 */
-	public int singUp(Member signUpMember) {
+	public int signUp(Member inputMember) {
 		
-		// insert, update, delete 를 수행하기 위한 메서드가 존재
-		// 반환값은 int로 고정
-		// mapper에서도 resultType이 _int로 고정
-		// 고로 생략 가능
+		// INSERT , UDPATE, DELETE를 수행하기 위한 메서드가 존재함
 		
-		int result = sqlSession.insert("memberMapper.signUp", signUpMember);
+		// * insert() / update() / delete() 메서드의 반환 값은 int형으로 고정
+		//  -> mapper에서도 resultType이 항상 _int로 고정 
+		//   -> resultType 생략 가능(묵시적으로 _int)
 		
-		
-		return result;
-		
-		
+		return sqlSession.insert("memberMapper.signUp", inputMember);
 	}
 
+
+	
 	/** 회원 1명 정보 조회 DAO
 	 * @param memberEmail
 	 * @return mem
@@ -106,5 +103,9 @@ public class MemberDAO {
 		return sqlSession.selectList("memberMapper.selectAll");
 	}
 
-
+	
+	
+	
+	
+	
 }

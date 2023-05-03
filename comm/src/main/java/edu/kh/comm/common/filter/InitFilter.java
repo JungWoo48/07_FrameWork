@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class InitFilter extends HttpFilter implements Filter {
 	
 	
-	// print 구문은 사용하지 않는다
+	// print 구문 사용하다 걸리면 바보
 	// -> Logger 사용
 	
 	// Logger 객체 생성 (해당 클래스에 대한 log를 출력하는 객체)
