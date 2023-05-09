@@ -48,6 +48,8 @@ public class MemberDAO {
 		
 		return loginMember;
 	}
+	
+	
 
 	
 	/** 이메일 중복 검사 DAO

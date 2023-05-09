@@ -14,18 +14,18 @@ import edu.kh.comm.member.model.dao.MyPageDAO;
 import edu.kh.comm.member.model.vo.Member;
 
 @Service
-public class MyPageServiceImpl implements MyPageService {
-
+public class MyPageServiceImpl implements MyPageService{
+	
 	@Autowired
 	private MyPageDAO dao;
 	
 	@Autowired
 	private BCryptPasswordEncoder bcrypt;
 	
+
 	// 회원 정보 수정 서비스 구현
 	@Override
 	public int updateInfo(Map<String, Object> paramMap) {
-		
 		return dao.updateInfo(paramMap);
 	}
 
@@ -37,16 +37,15 @@ public class MyPageServiceImpl implements MyPageService {
 		String encPw = dao.selectEncPw( (int)paramMap.get("memberNo") );
 		
 		// 2) 입력된 현재 비밀번호(평문)와
-		//	  조회된 비밀번호(암호화)를 비교(bcrypt.matches() 이용)
+		//		조회된 비밀번호(암호화)를 비교(bcrypt.matches() 이용)
 		
+
 		// 3) 비교 결과가 일치하면
-		//		새 비밀번호를 암호화해서 update 구문 수행
-		
-		if( bcrypt.matches( (String) paramMap.get("currentPw")   ,  encPw )) {
+		// 	  새 비밀번호 암호화해서 update 구문 수행
+		if( bcrypt.matches( (String)paramMap.get("currentPw") , encPw) ) {
 			
-			paramMap.put("newPw",  bcrypt.encode( (String)paramMap.get("newPw")  ));
-			// Map에 이미 같은 key가 존재하면
-			// value만 덮어씌움
+			paramMap.put("newPw", bcrypt.encode( (String)paramMap.get("newPw")) );
+			
 			
 			return dao.changePw(paramMap);
 			
@@ -54,23 +53,21 @@ public class MyPageServiceImpl implements MyPageService {
 		
 		// 비교 결과가 일치하지 않으면 0 반환
 		// -> "현재 비밀번호가 일치하지 않습니다"
+		
 		return 0;
 	}
 
-	
-	
-	
-	
 	// 회원 탈퇴 서비스 구현
 	@Override
 	public int secession(Member loginMember) {
 		
-		// 1) DB에서 암호화된 비밀번호를 조회하여 입력받은 비밀번호와 비교
+		
+		// 1) DB에서 현재 회원의 비밀번호를 조회
 		String encPw = dao.selectEncPw( loginMember.getMemberNo() );
 		
-		if( bcrypt.matches( loginMember.getMemberPw() , encPw ) ) {
+		if( bcrypt.matches( loginMember.getMemberPw() , encPw) ) {
+			// 2) 비밀번호가 일치하면 회원번호를 이용해서 탈퇴 진행
 			
-			// 2) 비밀번호가 일치하면 회원 번호를 이용해서 탈퇴 진행
 			return dao.secession(loginMember.getMemberNo());
 		}
 		
@@ -80,57 +77,56 @@ public class MyPageServiceImpl implements MyPageService {
 
 	// 프로필 이미지 수정 서비스 구현
 	@Override
-	public int updateProfile(Map<String, Object> map) throws IOException {
-						// webPath, folderPath, uploadImage, delete, memberNo
+	public int updateProfile(Map<String, Object> map) throws IOException{
+							// webPath, folderPath, uploadImage, delete(String) , memberNo
 		
-		// 자주쓰는 값 변수에 저장
-		MultipartFile uploadImage = (MultipartFile) map.get("uploadImage");
-		String delete = (String) map.get("delete"); // "0" (변경) / "1" (삭제)
+		// 자주 쓰는 값 변수에 저장
+		MultipartFile uploadImage = (MultipartFile)map.get("uploadImage");
+		String delete = (String)map.get("delete"); // "0" (변경) / "1" (삭제)
 		
 		// 프로필 이미지 삭제여부를 확인해서
-		// 삭제가 아닌 경우(== 새 이미지로 변경) -> 업로드된 파일명을 변경
-		// 삭제가 된 경우 -> NULL 값을 준비 (DB update)
+		// 삭제가 아닌 경우(== 새 이미지로 변경) -> 업로드된 파일명 변경
+		// 삭제된 경우 -> NULL 값을 준비
 		
-		String renameImage = null; //변경된 파일명 저장
+		String renameImage = null; // 변경된 파일명 저장 변수
 		
 		if( delete.equals("0") ) { // 이미지가 변경된 경우
 			
 			// 파일명 변경
 			// uploadImage.getOriginalFilename() : 원본 파일명
-			renameImage = Util.fileRename(uploadImage.getOriginalFilename());
-			// 202304228154532.png
+			renameImage = Util.fileRename( uploadImage.getOriginalFilename() );
 			
 			map.put("profileImage", map.get("webPath") + renameImage);
-			//    /resources/images/memberProfile/202304228154532.png
+									//  /resources/images/memberProfile/20220624122315.png
 			
 		} else {
 			
-			map.put("profileImage", null); 
+			map.put("profileImage", null);
+			
 		}
-		
 		
 		// DAO를 호출해서 프로필 이미지 수정
 		int result = dao.updateProfile(map);
 		
 		// DB 수정 성공 시 메모리에 임시 저장되어있는 파일을 서버에 저장
-		if(result > 0 && map.get("profileImage") != null) {
-			uploadImage.transferTo( new File( map.get("folderPath") + renameImage ));
+		if( result > 0 && map.get("profileImage") != null) {
+			uploadImage.transferTo( new File( map.get("folderPath") + renameImage) );
 		}
 		
 		
 		
 		return result;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }

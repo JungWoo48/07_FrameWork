@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class MyPageDAO {
-	
+
 	@Autowired
 	private SqlSessionTemplate sqlSession;
 	
-
+	
 	/** 회원 정보 수정 DAO
 	 * @param paramMap
 	 * @return result
@@ -58,23 +58,8 @@ public class MyPageDAO {
 	 * @return result
 	 */
 	public int updateProfile(Map<String, Object> map) {
-		
+		// TODO Auto-generated method stub
 		return sqlSession.update("myPageMapper.updateProfile", map);
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 }
