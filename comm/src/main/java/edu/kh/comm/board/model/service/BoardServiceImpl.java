@@ -102,30 +102,33 @@ public class BoardServiceImpl implements BoardService{
 	// 방법 1) <tx:advice> XML을 이용한 방법 -> 패턴을 지정하여 일치하는 메서드 호출 시 자동으로 트랜잭션 제어
 	
 	// 방법 2) @Transactional 선언적 트랜잭션 처리 방법
-	//		-> RuntimeException (Unchecked Exception) 처리를 기본값으로 갖음.
+	//		-> RuntimeException (Unchecked Exception=필수처리 안해도 ok) 처리를 기본값으로 갖음.
 	
-	// checked Exception : 예외 처리가 필수 ( transFerTo() ) -> SQL 관련 예외, 파일 업로드 관련 예외
+	// checked Exception : 예외 처리가 필수 ( transFerTo() ) -> SQL 관련 예외, 파일 업로드 관련 예외는 반드시 예외처리를 해야함
 	// Unchecked Exception : 예외 처리가 선택 ( int a = 10/0 ;  )
 	
 	// rollbackFor : rollback을 수행하기 위한 예외의 종류를 작성
 	
-	@Transactional(rollbackFor = { Exception.class })
+	@Transactional(rollbackFor = { Exception.class }) // 모든 예외를 잡아서 rollback처리 // 모든 종류의 예외 발생 시 롤백
 	@Override
 	public int insertBoard(BoardDetail detail, List<MultipartFile> imageList, String webPath, String folderPath) throws IOException  {
 		
 		// 1. 게시글 삽입
 		
 		// 1) XSS 방지 처리 + 개행문자 처리
+		// XSS란 악성 코드 방지
+		// Util.comm에서 가져오기
 		detail.setBoardTitle(  Util.XSSHandling(detail.getBoardTitle())  );
 		detail.setBoardContent(  Util.XSSHandling(detail.getBoardContent())  );
+		//  newLineHandling개행 문자
 		detail.setBoardContent(  Util.newLineHandling(detail.getBoardContent())  );
 		
 		//  2) 게시글 삽입 DAO 호출 후 게시글 번호 반환 받기
 		
-		//* 게시글 번호를 먼저 따로 생성했던 이유
+		// * 게시글 번호를 먼저 생성한 이유
 		// 1. 서비스 결과 반환 후 컨트롤러에서 상세조회로 리다이렉트 하기 위해
-		// 2. 동일한 시간에 삽입이 2회이상 진행된 경우 시퀀스 번호가 의도와 달리 여러번 증가해서
-		//    이후에 작성된 이미지 삽입 코드에 영향을 미치는걸 방지하기 위해서
+		// 2. 동일한 시간에 삽입이 2회 이상 진행된 경우 시퀀스 번호가 의도와 달리 여러번 증가해서
+		// 	  이후에 작성된 이미지 삽입 코드에 영양을 미치는걸 방지하기 위해서
 		
 		int boardNo = dao.insertBoard(detail);
 		
@@ -134,7 +137,7 @@ public class BoardServiceImpl implements BoardService{
 		if(boardNo > 0) {
 			// 이미지 삽입 
 			
-			// imageList : 실제 파일이 담겨있는 리스트
+			// imageList : 실제 파일이 담겨있는 리스트(클라이언트부터 들고옴)
 			// boardImageList : DB에 삽입할 이미지 정보만 담겨있는 리스트
 			// reNameList : 변경된 파일명이 담겨있는 리스트
 			
@@ -147,6 +150,7 @@ public class BoardServiceImpl implements BoardService{
 				if( imageList.get(i).getSize() > 0  ) { // i번째 요소에 업로드된 이미지가 있을 경우
 					
 					// 변경된 파일명 저장
+					// 오리지널 fileName을 넣어야 reName을 해줌
 					String reName = Util.fileRename( imageList.get(i).getOriginalFilename()  );
 					reNameList.add(reName);
 					
@@ -167,23 +171,25 @@ public class BoardServiceImpl implements BoardService{
 				
 				int result = dao.insertBoardImageList(boardImageList);
 				
-				// result == 삽입 성공한 행의 개수
+				// result == 삽입 성공한 행의 개수 꼭 0 or 1이 아닐수 있다
 				
-				if(result == boardImageList.size()) { // 삽입된 행의 개수와 업로드 이미지 수가 같을 경우  
+				if(result == boardImageList.size()) { // 삽입된 행의 개수와 업로드 이미지 수가 같을 경우가 성공한 경우
 					
 					// 서버에 이미지 저장
 					
 					for(int i=0 ; i < boardImageList.size() ; i++) {
 						int index = boardImageList.get(i).getImageLevel();
 						
+						// transferTo 변환에서 서버에 저장
 						imageList.get(index).transferTo(new File(folderPath + reNameList.get(i) ));  
 					}
 			
-				} else { // 이미지 삽입 실패 시
+				} else { // 이미지 삽입 실패 시 == 삽입 개수와 업로드 수가 다를때
 					 
 					// 강제로 예외를 발생 시켜 rollback을 수행하게 함
 					// -> 사용자 정의 예외 
 					throw new InsertFailException();
+					// 실패시 메세지가 뜨면서 롤백
 				}
 			
 			}
@@ -204,12 +210,13 @@ public class BoardServiceImpl implements BoardService{
 		// 1) XSS, 개행문자 처리
 		detail.setBoardTitle(    Util.XSSHandling(detail.getBoardTitle())  );
 		detail.setBoardContent(  Util.XSSHandling(detail.getBoardContent())  );
+		// 개행문자
 		detail.setBoardContent(  Util.newLineHandling(detail.getBoardContent())  );
 		
-		// 2) 게시글(제목, 내용, 마지막 수정일(sysdate) / boardNo 필요) 만 수정하는 DAO 호출
+		// 2) 게시글(제목, 내용, 마지막 수정일(sysdate) / boardNo 필요)만 수정하는 DAO 호출
 		int result = dao.updateBoard(detail);
 		
-		if(result > 0) {
+		if(result > 0) { // 게시글 수정 성공
 			
 			// 3) 업로드된 이미지만 분류하는 작업 수행
 			List<BoardImage> boardImageList = new ArrayList<BoardImage>();
@@ -255,18 +262,19 @@ public class BoardServiceImpl implements BoardService{
 					// 결과 0 -> 수정 X -> 기존 이미지가 없었다
 					//  -> insert 작업 수행
 					
-					// 6) update를 실패하면 insert
+					// 6) update를 실패하면 insert 즉 결과가 0
 					if(result == 0) {
 						result = dao.insertBoardImage(img);
-						// -> 값을 하나씩 대입해서 삽입하는 경우 결과가 0이 나올 수 없다!
-						//  단, 예외(제약조건 위배, sql 문법 오류 등)은 발생할 수 있다
+						// -> 값을 하나씩 대입 해서 삽입하는 경우 결과가 0이 나올수 없다
+						// 단, 예외(제약조건 위배, sql문법 오류등)은 발생할 수 있다.
+						
 					}
 			
 				} // for 종료
 				
 				
 				// 7) 업로된 이미지가 있다면 서버에 저장
-				if(!boardImageList.isEmpty() && result != 0) {
+				if(!boardImageList.isEmpty() && result != 0) { // 이미지가 비어있지 않고 0이 아님 == 삽입 성공
 					
 					for(int i=0 ; i< boardImageList.size() ; i++) {
 						

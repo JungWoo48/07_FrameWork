@@ -25,17 +25,22 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import edu.kh.comm.board.model.service.BoardService;
+import edu.kh.comm.board.model.service.ReplyService;
 import edu.kh.comm.board.model.vo.BoardDetail;
+import edu.kh.comm.board.model.vo.Reply;
 import edu.kh.comm.common.Util;
 import edu.kh.comm.member.model.vo.Member;
 
 @Controller
 @RequestMapping("/board")
-@SessionAttributes({"loginMember"})
+@SessionAttributes({"loginMember"}) // 세션에서 로그인 정보 갖고오기 어노네이션
 public class BoardController {
 	
 	@Autowired
 	private BoardService service;
+	
+	@Autowired
+	private ReplyService rService;
 	
 	
 	
@@ -92,6 +97,10 @@ public class BoardController {
 		
 		
 		if( detail != null ) { // 상세 조회 성공 시
+			
+			// 댓글 목록 조회
+			List<Reply> rlist = rService.selectReplyList(boardNo);
+			model.addAttribute("rlis", rlist);
 			
 			Member loginMember = (Member)session.getAttribute("loginMember");
 		
@@ -197,7 +206,6 @@ public class BoardController {
 		return "board/boardWriteForm";
 	}
 	
-	
 	// 게시글 작성 (삽입/수정)
 	// "/board/write/{boardCode}"
 	@PostMapping("/write/{boardCode}")
@@ -261,7 +269,6 @@ public class BoardController {
 			String path = null;
 			String message = null;
 			
-			
 			if(result > 0) {
 				// 현재 : /board/write/{boardCode}
 				// 목표 : /board/detail/{boardCode}/{boardNo}?cp=10
@@ -270,11 +277,11 @@ public class BoardController {
 				message = "게시글이 수정되었습니다.";
 				
 			} else {
-				path = req.getHeader("referer");
+				path = req.getHeader("referer"); // 이전페이지를 기억후 되돌아감
 				message = "게시글 수정 실패..";
 			}
 			
-			ra.addFlashAttribute("message", message);
+			ra.addFlashAttribute("message", message); // 세션에 잠시 저장
 			
 			return "redirect:" + path;
 		}
@@ -305,7 +312,7 @@ public class BoardController {
 			path = referer;
 		}
 		
-		ra.addFlashAttribute("message", message);
+		ra.addFlashAttribute("message", message); //flash 세션에 잠깐 올린다
 		
 		return "redirect:" + path;
 	}

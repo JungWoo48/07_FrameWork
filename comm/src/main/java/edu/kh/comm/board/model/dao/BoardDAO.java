@@ -79,8 +79,11 @@ public class BoardDAO {
 	public int insertBoard(BoardDetail detail) {
 		
 		int result = sqlSession.insert("boardMapper.insertBoard", detail); // 0 or 1
+		// 게시글 번호을 받기 위해서 int result 사용
 		
 		if( result > 0 ) result = detail.getBoardNo();
+		
+		// 게시글 삽입 성공시 <selectKey>태그를 이용해 세팅된 boardNo값을 반환함
 		
 		return result;
 	}
