@@ -33,9 +33,9 @@ public class ReplyController {
 	// 댓글 목록 조회
 	@GetMapping("/selectReplyList")
 	public String selectReplyList( int boardNo) {
-		List<Reply> rlist = service.selectReplyList(boardNo);
+		List<Reply> rList = service.selectReplyList(boardNo);
 		
-		return new Gson().toJson(rlist);	
+		return new Gson().toJson(rList);	
 	}
 	
 	// 댓글 등록

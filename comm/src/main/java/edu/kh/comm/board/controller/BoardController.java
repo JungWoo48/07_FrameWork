@@ -99,9 +99,11 @@ public class BoardController {
 		if( detail != null ) { // 상세 조회 성공 시
 			
 			// 댓글 목록 조회
-			List<Reply> rlist = rService.selectReplyList(boardNo);
-			model.addAttribute("rlis", rlist);
+			List<Reply> rList = rService.selectReplyList(boardNo);
+			model.addAttribute("rList", rList);
 			
+			// 세션이 있는지 없는지 확인
+			// 세션이 있으면 memberNo 세팅
 			Member loginMember = (Member)session.getAttribute("loginMember");
 		
 			int memberNo = 0;
