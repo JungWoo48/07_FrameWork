@@ -23,6 +23,7 @@ public class RepleyServiceimpl implements ReplyService{
 		return dao.selectReplyList(boardNo);
 	}
 
+	// 댓글 작성 서비스
 	@Override
 	public int insertReply(Reply reply) {
 		
@@ -32,6 +33,24 @@ public class RepleyServiceimpl implements ReplyService{
 		
 		
 		return dao.insertReply(reply);
+	}
+
+	// 댓글 수정 서비스
+	@Override
+	public int updateReply(Reply reply) {
+		
+		reply.setReplyContent( Util.XSSHandling( reply.getReplyContent()));
+		reply.setReplyContent( Util.newLineHandling( reply.getReplyContent()));
+		
+		return dao.updateReply(reply);
+	}
+
+	// 댓글 삭제 서비스
+	@Override
+	public int deleteReply(int replyNo) {
+	
+	
+		return dao.deleteReply(replyNo);
 	}
 
 	
